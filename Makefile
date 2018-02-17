@@ -1,14 +1,14 @@
 HEADERS = main.h
-LINKING = -lgmp
+LIBS = -lgmp
 
 default: main
 
-program.o: main.c $(HEADERS)
-    gcc $(LINKING) -c main.c -o main.o
+main.o: main.c $(HEADERS)
+	gcc -c main.c $(LIBS) -o main.o
 
-program: program.o
-    gcc main.o -o main
+main: main.o
+	gcc main.o -o main
 
 clean:
-    -rm -f main.o
-    -rm -f main
+	-rm -f main.o
+	-rm -f main
