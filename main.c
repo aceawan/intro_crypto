@@ -1,8 +1,11 @@
 #include "main.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 int main(int argc, char* argv){
-    mpz_t g, p, u, v, r, a;
+    /*
+	  mpz_t g, p, u, v, r, a;
 
     // G initialization
     mpz_inits(g, u, v, r, a, (void *) NULL);
@@ -17,7 +20,7 @@ int main(int argc, char* argv){
 	mpz_out_str(NULL, 10, v);
 	printf(" et ");
 	mpz_out_str(NULL, 10, r);
-
+	*/
     return 0;
 }
 
@@ -27,7 +30,24 @@ int main(int argc, char* argv){
  * Ma fonction de tests crados
  */
 void tests_subtils(){
-		/*
+	mpz_t g, p, u, v, r, a;
+
+    // G initialization
+    mpz_inits(g, u, v, r, a, (void *) NULL);
+    mpz_set_ui(g, 2);
+
+    // P initialization
+    mpz_init_set_str(p, P_HEX_VALUE, 16);
+
+	/*
+	euclide(r, u, v, g, p);
+
+	mpz_out_str(NULL, 10, u);
+	printf(" et ");
+	mpz_out_str(NULL, 10, v);
+	printf(" et ");
+	mpz_out_str(NULL, 10, r);
+
 	printf("\nGCDext:\n");
 	mpz_gcdext(r, u, v, g, p);
 	mpz_out_str(NULL, 10, u);
@@ -35,6 +55,7 @@ void tests_subtils(){
 	mpz_out_str(NULL, 10, v);
 	printf(" et ");
 	mpz_out_str(NULL, 10, r);
+
 	*/
 
     mpz_inits(a, r);
@@ -135,4 +156,23 @@ void expMod(mpz_t r, mpz_t p, mpz_t g, mpz_t a){
 		mpz_mul(r3, r2, g);
 		mpz_mod(r, r3, p);
 	}
+}
+
+/*
+KeyGen() est la fonction qui génère les clés de Bob, elle prend en entrée/sortie sans les modifier
+p et g, elle tire au hasard un x, la clé secrète de Bob et calcule sa clé publique correspondante
+X ≡ g x mod p. Elle renvoie en sortie x et X.
+*/
+void keyGen(mpz_t x, mpz_t big_x ,mpz_t p, mpz_t g){
+	mpz_t boundary;
+	gmp_randstate_t state;
+
+	mpz_init(boundary);
+	mpz_sub_ui(boundary, p, 1);
+
+	gmp_randinit_default(state);
+	gmp_randseed_ui(state, time(NULL));
+	mpz_urandomm(x, state, boundary);
+
+	expMod(big_x, p, g, x);
 }

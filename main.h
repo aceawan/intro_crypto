@@ -7,5 +7,6 @@
 
 void euclide(mpz_t r0, mpz_t u0, mpz_t v0, mpz_t a, mpz_t p);
 void expMod(mpz_t r, mpz_t p, mpz_t g, mpz_t a);
+void keyGen(mpz_t x, mpz_t big_x ,mpz_t p, mpz_t g);
 
 #endif
