@@ -5,31 +5,31 @@ int main(int argc, char* argv){
     mpz_t g, p, u, v, r, a;
 
     // G initialization
-    mpz_init(g);
+    mpz_inits(g, u, v, r, a, (void *) NULL);
     mpz_set_ui(g, 2);
-
 
     // P initialization
     mpz_init_set_str(p, P_HEX_VALUE, 16);
-	//euclide(r, u, v, g, p);
+	euclide(r, u, v, g, p);
 
-	/*
 	mpz_out_str(NULL, 10, u);
 	printf(" et ");
 	mpz_out_str(NULL, 10, v);
 	printf(" et ");
 	mpz_out_str(NULL, 10, r);
-
+	/*
 	printf("\nGCDext:\n");
 	mpz_gcdext(r, u, v, g, p);
 	mpz_out_str(NULL, 10, u);
 	printf(" et ");
 	mpz_out_str(NULL, 10, v);
 	printf(" et ");
-	mpz_out_str(NULL, 10, r);*/
+	mpz_out_str(NULL, 10, r);
+	*/
+
     mpz_inits(a, r);
 	mpz_set_ui(g, 135);
-	mpz_set_ui(a, 21);
+	mpz_set_ui(a, 218);
 	mpz_set_ui(p, 6128651);
 	expMod(r, p, g, a);
 	printf("\n");
@@ -37,7 +37,7 @@ int main(int argc, char* argv){
 	printf("\n");
 
 	mpz_set_ui(g, 135);
-	mpz_set_ui(a, 21);
+	mpz_set_ui(a, 218);
 	mpz_set_ui(p, 6128651);
 	mpz_set_ui(r, 0);
 	mpz_powm(r, g, a, p);
@@ -47,27 +47,21 @@ int main(int argc, char* argv){
     return 0;
 }
 
+
+/*
+ * calcule a*u0 + p*v0 = pgcd(a, b)
+ * le résultat est stocké dans r0, v0 et u0
+ * initialiser r0, v0 et u0 avant l'appel à la fonction
+ */
 void euclide(mpz_t r0, mpz_t u0, mpz_t v0, mpz_t a, mpz_t p){
 	mpz_t r, r1, u, u1, q, v, v1;
-	mpz_init(q);
-	mpz_init(r);
-    mpz_init(r0);
+	mpz_inits(r, r1, u, u1, q, v, v1, (void *) NULL);
     mpz_set(r0, a);
-
-    mpz_init(r1);
     mpz_set(r1, p);
-
-
-	mpz_init(u);
-    mpz_init(u0);
     mpz_set_ui(u0, 1);
-    mpz_init(u1);
     mpz_set_ui(u1, 0);
 
-	mpz_init(v);
-	mpz_init(v0);
     mpz_set_ui(v0, 0);
-    mpz_init(v1);
     mpz_set_ui(v1, 1);
 
     // mpz_sgn(r1) renvoie 1 si >0, 0 si == et -1 sinon
@@ -87,7 +81,6 @@ void euclide(mpz_t r0, mpz_t u0, mpz_t v0, mpz_t a, mpz_t p){
 		mpz_set(r0, r1);
 		mpz_set(r1, r);
 
-
 		//U0 := U1; U1 := U ;
 		mpz_set(u0, u1);
 		mpz_set(u1, u);
@@ -100,10 +93,10 @@ void euclide(mpz_t r0, mpz_t u0, mpz_t v0, mpz_t a, mpz_t p){
 
 /*
  * renvoie A ≡ g^a mod p
+ * le résultat est stocké dans r
+ * initialiser r avant l'appel à la fonction
  */
 void expMod(mpz_t r, mpz_t p, mpz_t g, mpz_t a){
-	mpz_out_str(NULL, 10, a);
-	printf(" ");
 	mpz_t quotient, rest, r0, r1, r2, r3;
 	mpz_inits(quotient, rest, r0, r1, r2, r3, (void *)NULL);
    	mpz_tdiv_qr_ui(quotient, rest, a, 2);
@@ -114,7 +107,6 @@ void expMod(mpz_t r, mpz_t p, mpz_t g, mpz_t a){
 		mpz_mod(r, g, p);
 	} else if(mpz_sgn(rest)==0){
 		//expmod(g^2 mod p , a/2)
-
 		//g^2
 		mpz_mul(r0, g, g);
 		//mod p
@@ -122,7 +114,7 @@ void expMod(mpz_t r, mpz_t p, mpz_t g, mpz_t a){
 		//expMod(r0, p, g, 2);
 		expMod(r, p, r1, quotient);
 	} else {
-		//g × puissance(g^2 mod p , (a − 1)/2) mod p
+		//expmod((g × puissance(g^2 mod p , (a − 1)/2) )mod p)
 		//g^2
 		mpz_mul(r0, g, g);
 		//mod p
@@ -131,9 +123,9 @@ void expMod(mpz_t r, mpz_t p, mpz_t g, mpz_t a){
 		mpz_sub_ui(a, a, 1);
 		mpz_tdiv_q_ui(quotient, a, 2);
 
-		expMod(r, p, r1, quotient);
+		expMod(r2, p, r1, quotient);
 
-		mpz_mul(r2, r, g);
-		mpz_mod(r, r2, p);
+		mpz_mul(r3, r2, g);
+		mpz_mod(r, r3, p);
 	}
 }
