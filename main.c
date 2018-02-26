@@ -17,7 +17,17 @@ int main(int argc, char* argv){
 	mpz_out_str(NULL, 10, v);
 	printf(" et ");
 	mpz_out_str(NULL, 10, r);
-	/*
+
+    return 0;
+}
+
+
+/*
+ * TODO : Supprimer pour le rendu final !!!!!!!!!!!!!!!!!!!!!!!
+ * Ma fonction de tests crados
+ */
+void tests_subtils(){
+		/*
 	printf("\nGCDext:\n");
 	mpz_gcdext(r, u, v, g, p);
 	mpz_out_str(NULL, 10, u);
@@ -43,10 +53,7 @@ int main(int argc, char* argv){
 	mpz_powm(r, g, a, p);
 	mpz_out_str(NULL, 10, r);
 	printf("\n");
-
-    return 0;
 }
-
 
 /*
  * calcule a*u0 + p*v0 = pgcd(a, b)
