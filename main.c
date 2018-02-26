@@ -3,43 +3,48 @@
 #include <stdlib.h>
 #include <time.h>
 
-int main(int argc, char* argv){
-    /*
-	  mpz_t g, p, u, v, r, a;
-
-    // G initialization
-    mpz_inits(g, u, v, r, a, (void *) NULL);
-    mpz_set_ui(g, 2);
-
-    // P initialization
-    mpz_init_set_str(p, P_HEX_VALUE, 16);
-	euclide(r, u, v, g, p);
-
-	mpz_out_str(NULL, 10, u);
-	printf(" et ");
-	mpz_out_str(NULL, 10, v);
-	printf(" et ");
-	mpz_out_str(NULL, 10, r);
-	*/
-    return 0;
-}
-
-
 /*
  * TODO : Supprimer pour le rendu final !!!!!!!!!!!!!!!!!!!!!!!
  * Ma fonction de tests crados
  */
 void tests_subtils(){
-	mpz_t g, p, u, v, r, a;
+	mpz_t g, p, u, v, r, a, x, big_x, c, b, m, m0;
 
     // G initialization
-    mpz_inits(g, u, v, r, a, (void *) NULL);
+    mpz_inits(g, u, v, r, a, x, big_x, c, b, m, m0,  (void *) NULL);
     mpz_set_ui(g, 2);
+
+	mpz_set_ui(m, 26041995);
 
     // P initialization
     mpz_init_set_str(p, P_HEX_VALUE, 16);
 
-	/*
+	printf("Clefs : \n");
+	keyGen(x, big_x, p, g);
+	printf("Clef publique X : ");
+	mpz_out_str(NULL, 10, big_x);
+	printf("\nClef privée x : ");
+	mpz_out_str(NULL, 10, x);
+	printf("\n\n");
+
+	encrypt(c, b, big_x, p, g, m);
+	printf("Message m : ");
+	mpz_out_str(NULL, 10, m);
+
+	printf("\nChiffrés\n");
+	printf("C : ");
+	mpz_out_str(NULL, 10, c);
+	printf("\nB : ");
+	mpz_out_str(NULL, 10, b);
+	printf("\n\n");
+
+	decrypt(m0, c, b, x, p);
+	printf("Message m déchiffré : ");
+	mpz_out_str(NULL, 10, m0);
+	printf("\n\n");
+
+
+/*
 	euclide(r, u, v, g, p);
 
 	mpz_out_str(NULL, 10, u);
@@ -58,6 +63,7 @@ void tests_subtils(){
 
 	*/
 
+	/*
     mpz_inits(a, r);
 	mpz_set_ui(g, 135);
 	mpz_set_ui(a, 218);
@@ -73,8 +79,32 @@ void tests_subtils(){
 	mpz_set_ui(r, 0);
 	mpz_powm(r, g, a, p);
 	mpz_out_str(NULL, 10, r);
-	printf("\n");
+	printf("\n");*/
 }
+
+int main(int argc, char* argv){
+    /*
+	  mpz_t g, p, u, v, r, a;
+
+    // G initialization
+    mpz_inits(g, u, v, r, a, (void *) NULL);
+    mpz_set_ui(g, 2);
+
+    // P initialization
+    mpz_init_set_str(p, P_HEX_VALUE, 16);
+	euclide(r, u, v, g, p);
+
+	mpz_out_str(NULL, 10, u);
+	printf(" et ");
+	mpz_out_str(NULL, 10, v);
+	printf(" et ");
+	mpz_out_str(NULL, 10, r);
+	*/
+	tests_subtils();
+    return 0;
+}
+
+
 
 /*
  * calcule a*u0 + p*v0 = pgcd(a, b)
@@ -168,11 +198,67 @@ void keyGen(mpz_t x, mpz_t big_x ,mpz_t p, mpz_t g){
 	gmp_randstate_t state;
 
 	mpz_init(boundary);
-	mpz_sub_ui(boundary, p, 1);
+	mpz_sub_ui(boundary, p, 2);
 
 	gmp_randinit_default(state);
-	gmp_randseed_ui(state, time(NULL));
+	//gmp_randseed_ui(state, time(NULL));
+	gmp_randseed_ui(state, 123987);
 	mpz_urandomm(x, state, boundary);
+	mpz_add_ui(x, x, 2);
 
 	expMod(big_x, p, g, x);
+}
+
+/*
+Encrypt() est la fonction qui produit en sortie le couple chiffré (C ≡ m × y mod p, B ≡
+g r mod p) en prenant en entrée la clé publique de Bob K p = (p, g, X) et un message m.
+*/
+void encrypt(mpz_t c, mpz_t b, mpz_t big_x ,mpz_t p, mpz_t g, mpz_t m){
+	mpz_t boundary, r, y;
+	gmp_randstate_t state;
+	mpz_inits(boundary, r, y, (void *)NULL);
+
+	// tirer r au hasard 2 et p-2
+	mpz_sub_ui(boundary, p, 2);
+
+	gmp_randinit_default(state);
+	long df = time(NULL);
+	//printf("%d", df);
+	gmp_randseed_ui(state, df);
+	//gmp_randseed_ui(state, 1519673962);
+	mpz_urandomm(r, state, boundary);
+	mpz_add_ui(r, r, 2);
+	printf("\n r : ");
+	mpz_out_str(NULL, 10, r);
+	printf("\n");
+
+	//y ≡ X r mod p.
+	expMod(y, p, big_x, r);
+
+	//C ≡ m × y mod p
+	mpz_mul(c, m, y);
+	mpz_mod(c, c, p);
+
+	//B ≡ g^r mod p
+	expMod(b, p, g, r);
+}
+
+/*
+Decrypt() est la fonction de déchiffrement qui prend en entrée (C, B) et la clé secrète de Bob
+Ks = x et produit en sortie le message m.
+*/
+void decrypt(mpz_t m, mpz_t c, mpz_t b, mpz_t x, mpz_t p){
+	mpz_t d, g, u, v, r, a;
+    mpz_inits(d, r, u, v, (void *) NULL);
+
+	// D = B^x mod p
+	expMod(d, p, b, x);
+
+	// D^-1 est dans u
+	euclide(r, u, v, d, p);
+
+	//m = C × D^−1 mod p.
+	mpz_mul(m, c, u);
+	mpz_mod(m, m, p);
+
 }
