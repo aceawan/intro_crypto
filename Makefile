@@ -1,14 +1,23 @@
+CC=gcc
 HEADERS = main.h
 LIBS = -lgmp
+FLAGS =
+OBJECTS = main.o
+EXEC = main
 
-default: main
+default: $(EXEC)
 
-main.o: main.c $(HEADERS)
-	gcc -c main.c $(LIBS) -o main.o
 
-main: main.o
-	gcc main.o -o main
+%.o: %.c $(HEADERS)
+	$(CC) $(FLAGS) -c $< -o $@
+
+$(EXEC): $(OBJECTS)
+	$(CC) $(OBJECTS) $(LIBS) -o $@
+
+
+run: $(EXEC)
+	./$(EXEC)
 
 clean:
-	-rm -f main.o
-	-rm -f main
+	rm -f $(OBJECTS)
+	rm -f $(EXEC)
