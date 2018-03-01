@@ -10,5 +10,6 @@ void expMod(mpz_t r, mpz_t p, mpz_t g, mpz_t a);
 void keyGen(mpz_t x, mpz_t big_x ,mpz_t p, mpz_t g);
 void encrypt(mpz_t c, mpz_t b, mpz_t big_x ,mpz_t p, mpz_t g, mpz_t m);
 void decrypt(mpz_t m, mpz_t c, mpz_t b, mpz_t x, mpz_t p);
-
+void test_euclide();
+void test_expMod();
 #endif
