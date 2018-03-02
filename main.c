@@ -14,13 +14,12 @@ void tests_subtils(){
     mpz_inits(g, u, v, r, a, x, big_x, c, b, m, m0,  (void *) NULL);
     mpz_set_ui(g, 2);
 
-	mpz_set_ui(m, 20);
+	mpz_set_ui(m, 260);
 
     // P initialization
     //mpz_init_set_str(p, P_HEX_VALUE, 16);
 	mpz_init(p);
-    mpz_set_d(p,134);
-	mpz_nextprime(p,p);
+    mpz_set_d(p,6522537);
 
 	printf("Clefs : \n");
 	keyGen(x, big_x, p, g);
@@ -301,8 +300,8 @@ void keyGen(mpz_t x, mpz_t big_x ,mpz_t p, mpz_t g){
 	gmp_randinit_default(state);
 	gmp_randseed_ui(state, time(NULL));
 	//gmp_randseed_ui(state, 123987);
-	mpz_urandomm(x, state, boundary);
 	mpz_add_ui(x, x, 2);
+	mpz_urandomm(x, state, boundary);
 
 	expMod(big_x, p, g, x);
 }
@@ -323,7 +322,7 @@ void encrypt(mpz_t c, mpz_t b, mpz_t big_x ,mpz_t p, mpz_t g, mpz_t m){
 	//long df = time(NULL);
 	//printf("%d", df);
 	//gmp_randseed_ui(state, df);
-	gmp_randseed_ui(state, time(NULL));
+	gmp_randseed_ui(state, time(NULL)*5);
 	mpz_urandomm(r, state, boundary);
 	mpz_add_ui(r, r, 2);
 
@@ -359,7 +358,7 @@ void decrypt(mpz_t m, mpz_t c, mpz_t b, mpz_t x, mpz_t p){
 	mpz_mul(m, c, u);
 
 
-	mpz_mul(m, c, u);
+	//mpz_mul(m, c, u);
 	mpz_mod(m, m, p);
 
 	mpz_clears(d, r, u, v, test,t,  (void *) NULL);
