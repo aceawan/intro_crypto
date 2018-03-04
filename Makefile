@@ -1,6 +1,6 @@
 CC=gcc
 HEADERS = main.h
-LIBS = -lgmp
+LIBS = -lgmp -lsodium
 FLAGS =
 OBJECTS = main.o
 EXEC = main
@@ -21,3 +21,4 @@ run: $(EXEC)
 clean:
 	rm -f $(OBJECTS)
 	rm -f $(EXEC)
+	rm -f test.txt

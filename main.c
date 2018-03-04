@@ -3,150 +3,75 @@
 #include <stdlib.h>
 #include <time.h>
 
-/*
- * TODO : Supprimer pour le rendu final !!!!!!!!!!!!!!!!!!!!!!!
- * Ma fonction de tests crados
- */
-void tests_subtils(){
-	mpz_t g, p, u, v, r, a, x, big_x, c, b, m, m0;
-
-    // G initialization
-    mpz_inits(g, u, v, r, a, x, big_x, c, b, m, m0,  (void *) NULL);
-    mpz_set_ui(g, 2);
-
-	mpz_set_ui(m, 260);
-
-    // P initialization
-    //mpz_init_set_str(p, P_HEX_VALUE, 16);
-	mpz_init(p);
-    mpz_set_d(p,6522537);
-
-	printf("Clefs : \n");
-	keyGen(x, big_x, p, g);
-	printf("Clef publique X : ");
-	mpz_out_str(NULL, 10, big_x);
-	printf("\nClef privée x : ");
-	mpz_out_str(NULL, 10, x);
-	printf("\n\n");
-
-	printf("Message m : ");
-	mpz_out_str(NULL, 10, m);
-
-	encrypt(c, b, big_x, p, g, m);
-	printf("\nChiffrés\n");
-	printf("C : ");
-	mpz_out_str(NULL, 10, c);
-	printf("\nB : ");
-	mpz_out_str(NULL, 10, b);
-	printf("\n\n");
-
-	decrypt(m0, c, b, x, p);
-	printf("Message m déchiffré : ");
-	mpz_out_str(NULL, 10, m0);
-	printf("\n\n");
-
-    mpz_clears(g, u, v, r, a, x, big_x, c, b, m, m0,  (void *) NULL);
-
-
-/*
-  euclide(r, u, v, g, p);
-
-  mpz_out_str(NULL, 10, u);
-  printf(" et ");
-  mpz_out_str(NULL, 10, v);
-  printf(" et ");
-  mpz_out_str(NULL, 10, r);
-
-  printf("\nGCDext:\n");
-  mpz_gcdext(r, u, v, g, p);
-  mpz_out_str(NULL, 10, u);
-  printf(" et ");
-  mpz_out_str(NULL, 10, v);
-  printf(" et ");
-  mpz_out_str(NULL, 10, r);
-
-*/
-
-	/*
-	  mpz_inits(a, r);
-	  mpz_set_ui(g, 135);
-	  mpz_set_ui(a, 218);
-	  mpz_set_ui(p, 6128651);
-	  expMod(r, p, g, a);
-	  printf("\n");
-	  mpz_out_str(NULL, 10, r);
-	  printf("\n");
-
-	  mpz_set_ui(g, 135);
-	  mpz_set_ui(a, 218);
-	  mpz_set_ui(p, 6128651);
-	  mpz_set_ui(r, 0);
-	  mpz_powm(r, g, a, p);
-	  mpz_out_str(NULL, 10, r);
-	  printf("\n");*/
-}
-
 int main(int argc, char* argv){
-    /*
-	  mpz_t g, p, u, v, r, a;
+	FILE* result_file = fopen("test.txt", "w+");
 
-	  // G initialization
-	  mpz_inits(g, u, v, r, a, (void *) NULL);
-	  mpz_set_ui(g, 2);
+	if(result_file == NULL){
+		printf("Erreur d'ouverture de fichier\n");
+		return -2;
+	}
 
-	  // P initialization
-	  mpz_init_set_str(p, P_HEX_VALUE, 16);
-	  euclide(r, u, v, g, p);
+	test_euclide(result_file);
+	test_expMod(result_file);
+	test_encryption(result_file);
+	test_homomorphie(result_file);
 
-	  mpz_out_str(NULL, 10, u);
-	  printf(" et ");
-	  mpz_out_str(NULL, 10, v);
-	  printf(" et ");
-	  mpz_out_str(NULL, 10, r);
-	*/
-	tests_subtils();
-	//test_euclide();
-	//test_expMod();
+	fclose(result_file);
     return 0;
 }
 
-void test_expMod(){
+void test_expMod(FILE* result_file){
 	int i;
 	int result = 0;
-	for(i=2; i<5000; i++){
-		int j;
-		for(j=1; j<10; j++){
-			mpz_t r, g, p, a;
-			mpz_t r2;
 
-			mpz_inits(r, r2, g, p, a,  (void *) NULL);
-			mpz_init_set_str(p, P_HEX_VALUE, 16);
+	fprintf(result_file, "\nTest de l'exponentiation modulaire : \n\n");
 
-			mpz_set_ui(g, i);
-			mpz_set_ui(a, j);
+	for(i=2; i<10000; i++){
+		mpz_t r, g, p, a;
+		mpz_t r2;
 
-			expMod(r, p, g, a);
-			mpz_powm(r2, g, a, p);
+		mpz_inits(r, r2, g, p, a,  (void *) NULL);
+		mpz_init_set_str(p, P_HEX_VALUE, 16);
 
-			if(mpz_cmp(r, r2)!=0){
-				printf("\nErreur:\n");
-				mpz_out_str(NULL, 10, r);
-				printf("\n et  \n");
-				mpz_out_str(NULL, 10, r2);
-				result = -1;
-			}
+		mpz_set_ui(g, i);
+		mpz_set_ui(a, 2);
 
-			mpz_clears(r, r2, g, p, a,  (void *) NULL);
+		expMod(r, p, g, a);
+		mpz_powm(r2, g, a, p);
+
+		if(i < 7){
+			char* g_str = mpz_get_str(NULL, 10, g);
+			char* p_str = mpz_get_str(NULL, 10, p);
+			char* a_str = mpz_get_str(NULL, 10, a);
+			char* r_str = mpz_get_str(NULL, 10, r);
+
+			fprintf(result_file, "%s^%s mod %s = %s\n", g_str, a_str, p_str, r_str);
 		}
+
+		if(mpz_cmp(r, r2)!=0){
+			printf("\nErreur:\n");
+			mpz_out_str(NULL, 10, r);
+			printf("\n et  \n");
+			mpz_out_str(NULL, 10, r2);
+			result = -1;
+		}
+
+		mpz_clears(r, r2, g, p, a,  (void *) NULL);
 	}
+
 	if(result == 0){
-		printf("\n Test expMod corrects \n");
+		printf("\nTest expMod corrects\n");
+	}
+	else{
+		printf("\nLe test d'exponentiation modulaire a réussi.\n");
 	}
 }
 
-void test_euclide(){
+void test_euclide(FILE* result_file){
 	int i;
 	int result = 0;
+
+	fprintf(result_file, "Tests d'Euclide : \n\n");
 	for(i=2; i<10002; i++){
 		mpz_t r, u, v, g, p;
 		mpz_t r2, u2, v2;
@@ -158,6 +83,16 @@ void test_euclide(){
 
 		mpz_inits(r2, u2, v2,  (void *) NULL);
 		mpz_gcdext(r2, u2, v2, g, p);
+
+		if(i < 7){
+			char* u_str = mpz_get_str(NULL, 10, u);
+			char* v_str = mpz_get_str(NULL, 10, v);
+			char* r_str = mpz_get_str(NULL, 10, r);
+			char* g_str = mpz_get_str(NULL, 10, g);
+			char* p_str = mpz_get_str(NULL, 10, p);
+
+			fprintf(result_file, "%s * %s + %s * %s = %s\n", u_str, g_str, v_str, p_str, r_str);
+		}
 
 
 		if(mpz_cmp_ui(r, 1)!=0){
@@ -191,7 +126,96 @@ void test_euclide(){
 		mpz_clears(r, u, v, g, p,  (void *) NULL);
 	}
 	if(result == 0){
-		printf("\n Test Euclide corrects \n");
+		printf("\nTest Euclide corrects\n");
+	}
+}
+
+void test_encryption(FILE* result_file){
+	int i;
+	int result = 0;
+	mpz_t old_x;
+	mpz_inits(old_x, (void*) NULL);
+
+	fprintf(result_file, "\nTests de chiffrement :\n\n");
+
+	for(i=2; i<102; i++){
+		mpz_t m, c, d, p, g, x, big_x, b;
+		mpz_inits(m, c, d, p, g, x, big_x, b, (void*) NULL); 
+		mpz_set_ui(m, i);
+		mpz_init_set_str(p, P_HEX_VALUE, 16);
+		mpz_set_ui(g, 2);
+
+		keyGen(x, big_x, p, g);
+
+		if(i > 2){
+			if(mpz_cmp(old_x, x) == 0){
+				result = -2;
+			}
+		}
+
+		mpz_set(old_x, x);
+
+		encrypt(c, b, big_x, p, g, m);
+		decrypt(d, c, b, x, p);
+
+		if(i < 7){
+			char* message = mpz_get_str(NULL, 10, m);
+			char* chiffre = mpz_get_str(NULL, 10, c);
+			char* dechiffre = mpz_get_str(NULL, 10, d);
+			fprintf(result_file, "message = %s, chiffré = %s, déchiffré = %s\n", message, chiffre, dechiffre);
+		}
+
+		if(mpz_cmp(m, d) != 0){
+			result = -1;
+		}
+	}
+
+	if(result == 0){
+		printf("\nTests de chiffrement-déchiffrement corrects\n");
+	} else if (result == -2){
+		printf("\nNombre aléatoires identiques\n");
+	}
+	else {
+		printf("\nErreur de chiffrement déchiffrement\n");
+	}
+}
+
+void test_homomorphie(FILE* result_file){
+	mpz_t p, g, x, big_x, m1, m2, b1, b2, c1, c2, d, product_m, product_c, product_b;
+	mpz_inits(p, g, x, big_x, m1, m2, b1, b2, c1, c2, d, product_m, product_c, product_b, (void *)NULL);
+
+	// Initialize the values
+	mpz_init_set_str(p, P_HEX_VALUE, 16);
+	mpz_set_ui(g, 2);
+	mpz_set_ui(m1, randombytes_uniform(1000000));
+	mpz_set_ui(m2, randombytes_uniform(1000000));
+	mpz_mul(product_m, m1, m2);
+
+	// Generate the keys
+	keyGen(x, big_x, p, g);
+
+	// Encryption of m1 and m2
+	encrypt(c1, b1, big_x, p, g, m1);
+	encrypt(c2, b2, big_x, p, g, m2);
+	mpz_mul(product_c, c1, c2);
+	mpz_mul(product_b, b1, b2);
+
+	// Decryption of m1 x m2
+	decrypt(d, product_c, product_b, x, p);
+
+	mpz_mod(d, d, p);
+
+	fprintf(result_file, "\nTest d'homomorphie : \n\n");
+
+	char* message1 = mpz_get_str(NULL, 10, m1);
+	char* message2 = mpz_get_str(NULL, 10, m2);
+	char* produitm1m2 = mpz_get_str(NULL, 10, product_m);
+	char* produitdechiffres = mpz_get_str(NULL, 10, d);
+
+	fprintf(result_file, "m1 = %s, m2 = %s, m1xm2 mod p = %s, déchiffré du produit des chiffrés de m1 et m2 = %s", message1, message2, produitm1m2, produitdechiffres);
+
+	if(mpz_cmp(d, product_m) != 0){
+		printf("ERREUR HOMOMORPHIE\n");
 	}
 }
 
@@ -269,6 +293,7 @@ void expMod(mpz_t r, mpz_t p, mpz_t g, mpz_t a){
 				//g*expmod(r, p, g^2, (a − 1)/2) mod p ) mod p
 				//g^2
 				mpz_mul(g_pow_2, g, g);
+				mpz_mod(g_pow_2, g_pow_2, p);
 				//(a-1) / 2
 				mpz_sub_ui(quotient, a, 1);
 				mpz_tdiv_q_ui(quotient, a, 2);
@@ -298,7 +323,8 @@ void keyGen(mpz_t x, mpz_t big_x ,mpz_t p, mpz_t g){
 	mpz_sub_ui(boundary, p, 1);
 
 	gmp_randinit_default(state);
-	gmp_randseed_ui(state, time(NULL));
+	int random_seed = randombytes_uniform(10000000);
+	gmp_randseed_ui(state, random_seed);
 	//gmp_randseed_ui(state, 123987);
 	mpz_add_ui(x, x, 2);
 	mpz_urandomm(x, state, boundary);
